@@ -1,27 +1,23 @@
 package com.sk.dungeonboardgame.models.creatures;
 
 import com.sk.dungeonboardgame.board.Tile;
+import com.sk.dungeonboardgame.models.board.BoardElement;
+import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
-public abstract class Creature {
-
-    String name;
+public abstract class Creature extends BoardElement {
     int health;
     boolean isAlive = true;
     Weapon baseWeapon = null;
 
-    Tile tile;
-    int currentRow;
-    int currentColumn;
 
-
-    public Creature(String name, int health, Weapon baseWeapon, int currentRow, int currentColumn) {
-        this.name = name;
+    public Creature(String name, ImageView imageView, Position position, int health, Weapon baseWeapon) {
+        super(name, imageView, position);
         this.health = health;
         this.baseWeapon = baseWeapon;
-        this.currentRow = currentRow;
-        this.currentColumn = currentColumn;
     }
 
     public boolean isAlive() {
@@ -40,35 +36,37 @@ public abstract class Creature {
         }
     }
 
-    public abstract ImageView getImageView();
+    public boolean move(KeyCode key) {
+        Position suggetedPosition = position.clone();
 
-    public void updateCurrentPosition(int row, int column, Tile tile) {
-        this.currentRow = row;
-        this.currentColumn = column;
-        this.tile = tile;
-    }
+        switch (key) {
+            case W:
+                suggetedPosition.row--;
+                break;
+            case S:
+                suggetedPosition.row++;
+                break;
+            case A:
+                suggetedPosition.column--;
+                break;
+            case D:
+                suggetedPosition.column++;
+                break;
+            default:
+                return false;
+        }
 
-    public int getCurrentRow() {
-        return currentRow;
-    }
+        System.out.println("Current position: " + position.row + " " + position.column + "Suggested position: " + suggetedPosition.row + " " + suggetedPosition.column);
 
-    public int getCurrentColumn() {
-        return currentColumn;
-    }
+        // position has already been taken
+        if(tile.isPlaceTaken(suggetedPosition)) {
+            return false;
+        }
 
-    public void moveLeft() {
-        tile.updateCreaturePosition(this, this.currentRow, this.currentColumn - 1);
-    }
+        position = suggetedPosition;
 
-    public void moveRight() {
-        tile.updateCreaturePosition(this, this.currentRow, this.currentColumn + 1);
-    }
+        tile.updatePosition(this, position);
 
-    public void moveUp() {
-        tile.updateCreaturePosition(this, this.currentRow - 1, this.currentColumn);
-    }
-
-    public void moveDown() {
-        tile.updateCreaturePosition(this, this.currentRow + 1, this.currentColumn);
+        return true;
     }
 }

@@ -1,22 +1,21 @@
 package com.sk.dungeonboardgame.models.creatures;
 
+import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 
 public class Monster extends Creature {
+    public int speedPoints = 2;
 
-    private int speedPoints = 2;
-
-    private ImageView imageView = new ImageView(new Image("/images/heroes/ninja.png"));
-
-    public Monster(String name, int health, Weapon claws, int row, int column) {
-        super(name, health, claws, row, column);
+    public Monster(String name, Position position, int health, Weapon weapon) {
+        super(name, new ImageView(new Image("/images/heroes/ninja.png")), position, health, weapon);
     }
 
-    @Override
-    public ImageView getImageView() {
-        return imageView;
+    public Monster(String name, Position position, int health, Weapon weapon, String image) {
+        super(name, new ImageView(new Image("/images/heroes/" + image)), position, health, weapon);
     }
 
     @Override
@@ -26,55 +25,23 @@ public class Monster extends Creature {
         if (this.health <= 0) {
             this.health = 0;
             this.isAlive = false;
-            this.tile.removeMonster(this);
+            this.tile.removeElement(this);
 
             System.out.println(name + " is dead!");
         }
     }
 
     @Override
-    public void moveUp() {
-        if(checkHeroExist(currentRow - 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveUp();
+    public boolean move(KeyCode keyCode) {
+        // check if place is already taken
+        if(speedPoints > 0) {
+            if(!super.move(keyCode)) {
+                return false;
+            }
             speedPoints--;
         }
-    }
 
-    @Override
-    public void moveDown() {
-        if(checkHeroExist(currentRow + 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveDown();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveLeft() {
-        if(checkHeroExist(currentRow, currentColumn - 1)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveLeft();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveRight() {
-        if(checkHeroExist(currentRow, currentColumn + 1)) {
-            return;
-        }
-
-        if (speedPoints > 0) {
-            super.moveRight();
-            speedPoints--;
-        }
+        return true;
     }
 
     @Override
@@ -84,62 +51,32 @@ public class Monster extends Creature {
         }
     }
 
-    public void monsterTurn() {
-        moveToClosestHero();
-        attack(tile.getHero());
-    }
+    public boolean moveToClosestHero() {
+        System.out.println(name + ": Moving to closest hero");
 
-    private void moveToClosestHero() {
-        while (speedPoints > 0 && !isNearHero()) {
-            System.out.println("Moving to closest hero");
+        Position difference = tile.getHero().getPosition().getDifference(this.position);
 
-            int heroRow = tile.getHero().getCurrentRow();
-            int heroColumn = tile.getHero().getCurrentColumn();
-
-            int rowDiff = heroRow - currentRow;
-            int columnDiff = heroColumn - currentColumn;
-
-            if(rowDiff > 1) {
-                moveDown();
-            }
-
-            if(rowDiff < -1) {
-                moveUp();
-            }
-
-            if(columnDiff > 1) {
-                moveRight();
-            }
-
-            if(columnDiff < -1) {
-                moveLeft();
-            }
+        if(difference.row > 1) {
+            move(KeyCode.S);
+            return true;
+        }
+        if(difference.row < -1) {
+            move(KeyCode.W);
+            return true;
+        }
+        if(difference.column > 1) {
+            move(KeyCode.D);
+            return true;
+        }
+        if(difference.column < -1) {
+            move(KeyCode.A);
+            return true;
         }
 
-        //reset speed
-        speedPoints = 2;
+        return false;
     }
 
     public boolean isNearHero() {
-        int heroRow = tile.getHero().getCurrentRow();
-        int heroColumn = tile.getHero().getCurrentColumn();
-
-        if(Math.abs(heroRow - currentRow) <= 1 && Math.abs(heroColumn - currentColumn) <= 1) {
-            return true;
-        }
-
-        return false;
+        return tile.getHero().getPosition().getDistance(position) <= 1;
     }
-
-    private boolean checkHeroExist(int row, int column) {
-        int heroRow = tile.getHero().getCurrentRow();
-        int heroColumn = tile.getHero().getCurrentColumn();
-
-        if(heroRow == row && heroColumn == column) {
-            return true;
-        }
-
-        return false;
-    }
-
 }
