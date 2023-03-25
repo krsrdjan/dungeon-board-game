@@ -1,17 +1,25 @@
 package com.sk.dungeonboardgame.models.creatures;
 
 import com.sk.dungeonboardgame.models.weapons.Weapon;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 
 public class Monster extends Creature {
 
-    private int speedPoints = 2;
+    public int speedPoints = 2;
 
     private ImageView imageView = new ImageView(new Image("/images/heroes/ninja.png"));
 
     public Monster(String name, int health, Weapon claws, int row, int column) {
         super(name, health, claws, row, column);
+    }
+
+    public Monster(String name, int health, Weapon claws, int row, int column, String image) {
+        super(name, health, claws, row, column);
+
+        imageView = new ImageView(new Image("/images/heroes/" + image));
     }
 
     @Override
@@ -33,48 +41,16 @@ public class Monster extends Creature {
     }
 
     @Override
-    public void moveUp() {
-        if(checkHeroExist(currentRow - 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveUp();
+    public boolean move(KeyCode keyCode) {
+        // check if place is already taken
+        if(speedPoints > 0) {
+            if(!super.move(keyCode)) {
+                return false;
+            }
             speedPoints--;
         }
-    }
 
-    @Override
-    public void moveDown() {
-        if(checkHeroExist(currentRow + 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveDown();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveLeft() {
-        if(checkHeroExist(currentRow, currentColumn - 1)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveLeft();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveRight() {
-        if(checkHeroExist(currentRow, currentColumn + 1)) {
-            return;
-        }
-
-        if (speedPoints > 0) {
-            super.moveRight();
-            speedPoints--;
-        }
+        return true;
     }
 
     @Override
@@ -84,40 +60,33 @@ public class Monster extends Creature {
         }
     }
 
-    public void monsterTurn() {
-        moveToClosestHero();
-        attack(tile.getHero());
-    }
+    public boolean moveToClosestHero() {
+        System.out.println(name + ": Moving to closest hero");
 
-    private void moveToClosestHero() {
-        while (speedPoints > 0 && !isNearHero()) {
-            System.out.println("Moving to closest hero");
+        int heroRow = tile.getHero().getCurrentRow();
+        int heroColumn = tile.getHero().getCurrentColumn();
 
-            int heroRow = tile.getHero().getCurrentRow();
-            int heroColumn = tile.getHero().getCurrentColumn();
+        int rowDiff = heroRow - currentRow;
+        int columnDiff = heroColumn - currentColumn;
 
-            int rowDiff = heroRow - currentRow;
-            int columnDiff = heroColumn - currentColumn;
-
-            if(rowDiff > 1) {
-                moveDown();
-            }
-
-            if(rowDiff < -1) {
-                moveUp();
-            }
-
-            if(columnDiff > 1) {
-                moveRight();
-            }
-
-            if(columnDiff < -1) {
-                moveLeft();
-            }
+        if(rowDiff > 1) {
+            move(KeyCode.S);
+            return true;
+        }
+        if(rowDiff < -1) {
+            move(KeyCode.W);
+            return true;
+        }
+        if(columnDiff > 1) {
+            move(KeyCode.D);
+            return true;
+        }
+        if(columnDiff < -1) {
+            move(KeyCode.A);
+            return true;
         }
 
-        //reset speed
-        speedPoints = 2;
+        return false;
     }
 
     public boolean isNearHero() {
@@ -135,11 +104,6 @@ public class Monster extends Creature {
         int heroRow = tile.getHero().getCurrentRow();
         int heroColumn = tile.getHero().getCurrentColumn();
 
-        if(heroRow == row && heroColumn == column) {
-            return true;
-        }
-
-        return false;
+        return heroRow == row && heroColumn == column;
     }
-
 }

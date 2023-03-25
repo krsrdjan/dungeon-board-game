@@ -1,8 +1,11 @@
 package com.sk.dungeonboardgame.models.creatures;
 
+import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
+import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 
 public class Hero extends Creature {
 
@@ -34,52 +37,30 @@ public class Hero extends Creature {
     }
 
     @Override
-    public void moveUp() {
-        if(checkMonsterExist(currentRow - 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveUp();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveDown() {
-        if(checkMonsterExist(currentRow + 1, currentColumn)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveDown();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveLeft() {
-        if(checkMonsterExist(currentRow, currentColumn - 1)) {
-            return;
-        }
-        if (speedPoints > 0) {
-            super.moveLeft();
-            speedPoints--;
-        }
-    }
-
-    @Override
-    public void moveRight() {
-        if(checkMonsterExist(currentRow, currentColumn + 1)) {
-            return;
+    public boolean move(KeyCode keyCode) {
+        if(!GameState.isPlyerTurn) {
+            return false;
         }
 
+        if(checkMonsterExist(currentRow, currentColumn)) {
+            return false;
+        }
         if (speedPoints > 0) {
-            super.moveRight();
+            if(!super.move(keyCode)) {
+                return false;
+            }
             speedPoints--;
         }
+
+        return true;
     }
 
     @Override
     public void attack(Creature target) {
+        if(!GameState.isPlyerTurn) {
+            return;
+        }
+
         if(isNearMonster() && attackPoints > 0) {
             super.attack(target);
             attackPoints--;
@@ -129,8 +110,9 @@ public class Hero extends Creature {
     }
 
     public void endTurn() {
-        tile.getMonsters().forEach(m -> m.monsterTurn());
+        //tile.getMonsters().forEach(m -> m.monsterTurn());
         speedPoints = 2;
         attackPoints = 1;
+        GameState.isPlyerTurn = false;
     }
 }

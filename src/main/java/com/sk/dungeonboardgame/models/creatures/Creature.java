@@ -3,15 +3,17 @@ package com.sk.dungeonboardgame.models.creatures;
 import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 public abstract class Creature {
 
-    String name;
+    public String name;
     int health;
     boolean isAlive = true;
     Weapon baseWeapon = null;
 
-    Tile tile;
+    public Tile tile;
     int currentRow;
     int currentColumn;
 
@@ -56,19 +58,37 @@ public abstract class Creature {
         return currentColumn;
     }
 
-    public void moveLeft() {
-        tile.updateCreaturePosition(this, this.currentRow, this.currentColumn - 1);
-    }
+    public boolean move(KeyCode key) {
+        int suggestedRow = this.currentRow;
+        int suggestedColumn = this.currentColumn;
 
-    public void moveRight() {
-        tile.updateCreaturePosition(this, this.currentRow, this.currentColumn + 1);
-    }
+        switch (key) {
+            case W:
+                suggestedRow -= 1;
+                break;
+            case S:
+                suggestedRow+= 1;
+                break;
+            case A:
+                suggestedColumn -= 1;
+                break;
+            case D:
+                suggestedColumn += 1;
+                break;
+            default:
+                return false;
+        }
 
-    public void moveUp() {
-        tile.updateCreaturePosition(this, this.currentRow - 1, this.currentColumn);
-    }
+        // position has already been taken
+        if(tile.isPlaceTaken(suggestedColumn, suggestedRow)) {
+            return false;
+        }
 
-    public void moveDown() {
-        tile.updateCreaturePosition(this, this.currentRow + 1, this.currentColumn);
+        this.currentColumn = suggestedColumn;
+        this.currentRow = suggestedRow;
+
+        tile.updateCreaturePosition(this, this.currentRow, this.currentColumn);
+
+        return true;
     }
 }
