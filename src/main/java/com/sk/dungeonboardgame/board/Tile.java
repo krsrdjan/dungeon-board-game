@@ -1,7 +1,10 @@
 package com.sk.dungeonboardgame.board;
 
+import com.sk.dungeonboardgame.models.board.BoardElement;
 import com.sk.dungeonboardgame.models.board.TileVisibility;
 import com.sk.dungeonboardgame.models.collectables.Collectable;
+import com.sk.dungeonboardgame.models.core.Position;
+import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.creatures.Creature;
 import com.sk.dungeonboardgame.models.creatures.Hero;
 import com.sk.dungeonboardgame.models.creatures.Monster;
@@ -20,14 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tile extends GridPane {
-
     private static final int tileLength = 16;
     private static final int squareSize = 50;
-
     private TileVisibility[][] tileVisibility = new TileVisibility[16][16];
-
     private List<Monster> monsters = new ArrayList<>();
     private List<Collectable> collectables = new ArrayList<>();
+    private List<BoardElement> elements = new ArrayList<>();
     private Hero hero;
 
     public Tile() {
@@ -53,7 +54,7 @@ public class Tile extends GridPane {
     public void calculateVisibility() {
         for (int row = 0; row < tileLength; row++) {
             for (int column = 0; column < tileLength; column++) {
-                Color color = isInHeroRange(row, column)
+                Color color = isInHeroRange(new Position(row, column))
                         ? Color.TRANSPARENT
                         : new Color(0.2f, 0.2f, 0.2f, 0.9f);
 
@@ -73,42 +74,31 @@ public class Tile extends GridPane {
         }
     }
 
-    private boolean isInHeroRange(int row, int column) {
-        int heroRow = hero.getCurrentRow();
-        int heroColumn = hero.getCurrentColumn();
+    private boolean isInHeroRange(Position pos) {
+        var distance = hero.getPosition().getDistance(pos);
 
-        double x = Math.pow(Math.abs(row - heroRow), 2);
-        double y = Math.pow(Math.abs(column - heroColumn), 2);
-
-        return Math.round(Math.sqrt(x + y)) < GameState.visibilityRange;
+        return distance < GameState.visibilityRange;
     }
 
-    public void updateCreaturePosition(Creature creature, int row, int column) {
-        this.getChildren().remove(creature.getImageView());
+    public void updatePosition(BoardElement element, Position position) {
+        this.getChildren().remove(element.getImageView());
 
-        if(isInHeroRange(row, column)) {
+        if(isInHeroRange(position)) {
+            var imageView = element.getImageView();
             //add creature to new position
-            ImageView imageView = creature.getImageView();
             imageView.setFitWidth(squareSize);
             imageView.setFitHeight(squareSize);
-            super.add(imageView, column, row);
+            super.add(imageView, position.column, position.row);
         }
 
-        creature.updateCurrentPosition(row, column, this);
+        element.updatePosition(position, this);
+
         calculateVisibility();
-    }
-
-    public void updateCollectablePosition(Collectable collectable, int row, int column) {
-
-    }
-
-    private void updatePosition() {
-
     }
 
     public void setHero(Hero hero) {
         this.hero = hero;
-        this.updateCreaturePosition(hero, hero.getCurrentRow(), hero.getCurrentColumn());
+        this.updatePosition(hero, hero.getPosition());
     }
 
     public Hero getHero() {
@@ -119,53 +109,58 @@ public class Tile extends GridPane {
         this.getChildren().remove(hero.getImageView());
     }
 
-    public void addMonster(Monster monster) {
-        monsters.add(monster);
-        this.updateCreaturePosition(monster, monster.getCurrentRow(), monster.getCurrentColumn());
+    public void addElement(BoardElement element) {
+        elements.add(element);
+        this.updatePosition(element, element.getPosition());
     }
 
-    public void addCollectable(Collectable collectable) {
-        collectables.add(collectable);
-        //this.updateCreaturePosition(monster, monster.getCurrentRow(), monster.getCurrentColumn());
-    }
-
-    public void removeMonster(Monster monster) {
-        monsters.remove(monster);
-        this.getChildren().remove(monster.getImageView());
+    public void removeElement(BoardElement element) {
+        elements.remove(element);
+        this.getChildren().remove(element.getImageView());
     }
 
     public List<Monster> getMonsters() {
         return monsters;
     }
 
-    public boolean isPlaceTaken(int column, int row) {
+    public boolean isPlaceTaken(Position position) {
         // validate borders first
-        if(isOutOfBounds(column, row)) {
+        if(isOutOfBounds(position)) {
             return true;
         }
 
         // validate monsters positions
         for(Monster monster : monsters) {
-            if(monster.getCurrentColumn() == column && monster.getCurrentRow() == row) {
+            if(monster.getPosition().isCollided(position)) {
                 return true;
             }
         }
 
         // validate hero position
-        if(hero.getCurrentColumn() == column && hero.getCurrentRow() == row) {
+        if(hero.getPosition().isCollided(position)) {
             return true;
         }
 
         return false;
     }
 
-    private boolean isOutOfBounds(int column, int row) {
-        if(column < 0 || column >= tileLength)
+    private boolean isOutOfBounds(Position position) {
+        if(position.row < 0 || position.row >= tileLength)
             return true;
 
-        if(row < 0 || row >= tileLength)
+        if(position.column < 0 || position.column >= tileLength)
             return true;
 
         return false;
+    }
+
+    public void processIfCollidedWithCollectable()  {
+        elements.stream().filter(x -> x.getType() == ElementType.Coin).forEach(x -> {
+            Collectable c = (Collectable)x;
+            if(hero.isCollided(c)) {
+                removeElement(c);
+                c.collect();
+            }
+        });
     }
 }

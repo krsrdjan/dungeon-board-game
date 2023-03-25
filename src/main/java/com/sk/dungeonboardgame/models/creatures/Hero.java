@@ -1,6 +1,7 @@
 package com.sk.dungeonboardgame.models.creatures;
 
 import com.sk.dungeonboardgame.board.Tile;
+import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.Image;
@@ -12,15 +13,8 @@ public class Hero extends Creature {
     private int speedPoints = 2;
     private int attackPoints = 1;
 
-    private ImageView imageView = new ImageView(new Image("/images/heroes/knight.png"));
-
-    public Hero(String name, int health, Weapon weapon, int row, int column) {
-        super(name, health, weapon, row, column);
-    }
-
-    @Override
-    public ImageView getImageView() {
-        return imageView;
+    public Hero(String name, Position position, int health, Weapon weapon) {
+        super(name, new ImageView(new Image("/images/heroes/knight.png")), position, health, weapon);
     }
 
     @Override
@@ -42,7 +36,7 @@ public class Hero extends Creature {
             return false;
         }
 
-        if(checkMonsterExist(currentRow, currentColumn)) {
+        if(checkMonsterExist(position)) {
             return false;
         }
         if (speedPoints > 0) {
@@ -51,6 +45,8 @@ public class Hero extends Creature {
             }
             speedPoints--;
         }
+
+        tile.processIfCollidedWithCollectable();
 
         return true;
     }
@@ -67,12 +63,9 @@ public class Hero extends Creature {
         }
     }
 
-    private boolean checkMonsterExist(int row, int column) {
+    private boolean checkMonsterExist(Position pos) {
         for(Monster m : tile.getMonsters()) {
-            int monsterRow = m.getCurrentRow();
-            int monsterColumn = m.getCurrentColumn();
-
-            if(monsterRow == row && monsterColumn == column) {
+            if(position.isCollided(m.getPosition())) {
                 return true;
             }
         }
@@ -81,25 +74,19 @@ public class Hero extends Creature {
 
     public boolean isNearMonster() {
         for(Monster m : tile.getMonsters()) {
-           int monsterRow = m.getCurrentRow();
-           int monsterColumn = m.getCurrentColumn();
-
-           if(Math.abs(monsterRow - currentRow) <= 1 && Math.abs(monsterColumn - currentColumn) <= 1) {
-              return true;
-           }
+            if(position.getDistance(m.getPosition()) <= 1) {
+                return true;
+            }
         }
         return false;
     }
 
     public Monster getClosestMonster(){
         Monster closestMonster = null;
-        int closestDistance = Integer.MAX_VALUE;
+        double closestDistance = Integer.MAX_VALUE;
 
         for(Monster m : tile.getMonsters()) {
-            int monsterRow = m.getCurrentRow();
-            int monsterColumn = m.getCurrentColumn();
-
-            int distance = Math.abs(monsterRow - currentRow) + Math.abs(monsterColumn - currentColumn);
+            double distance = position.getDistance(m.getPosition());
 
             if(distance < closestDistance) {
                 closestDistance = distance;
@@ -110,7 +97,6 @@ public class Hero extends Creature {
     }
 
     public void endTurn() {
-        //tile.getMonsters().forEach(m -> m.monsterTurn());
         speedPoints = 2;
         attackPoints = 1;
         GameState.isPlyerTurn = false;

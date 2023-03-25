@@ -27,12 +27,12 @@ public class MonsterAnimationTimer extends AnimationTimer {
             }
             delay();
         } else {
-            monster.attack(monster.tile.getHero());
-            GameState.isPlyerTurn = true;
+            monster.attack(monster.getTile().getHero());
 
             currentIdx++;
             if(currentIdx >= monsters.size()) {
                 GameState.turnCount++;
+                GameState.isPlyerTurn = true;
                 stop();
             }
 

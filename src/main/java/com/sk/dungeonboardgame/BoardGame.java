@@ -2,8 +2,10 @@ package com.sk.dungeonboardgame;
 
 import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.mechanics.MonsterAnimationTimer;
+import com.sk.dungeonboardgame.models.board.BoardElement;
 import com.sk.dungeonboardgame.models.collectables.Coin;
 import com.sk.dungeonboardgame.models.collectables.Collectable;
+import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.creatures.Hero;
 import com.sk.dungeonboardgame.models.creatures.Monster;
 import com.sk.dungeonboardgame.models.weapons.BattleAxe;
@@ -29,25 +31,18 @@ public class BoardGame extends Application {
     public void start(Stage primaryStage) throws Exception {
         grid = new Tile();
 
-        Hero hero = new Hero("Fighter", 10, new ShortSword(), 7, 3);
+        Hero hero = new Hero("Fighter", new Position(7, 3), 10, new ShortSword());
 
-        Monster[] monsters = new Monster[] {
-            new Monster("Ninja", 10, new Claws(), 0, 2),
-            new Monster("Dragon", 10, new BattleAxe(), 3, 7, "dragonborn.png"),
-        };
-
-        Collectable[] collectables = new Collectable[] {
-                new Coin(10, 10, 5)
+        BoardElement[] elements = new BoardElement[] {
+            new Monster("Ninja", new Position(0, 2), 10, new Claws()),
+            new Monster("Dragon",  new Position(3, 7),10, new BattleAxe(), "dragonborn.png"),
+            new Coin(new Position(8, 3), 3)
         };
 
         grid.setHero(hero);
 
-        for(Monster m : monsters) {
-            grid.addMonster(m);
-        }
-
-        for(Collectable c : collectables) {
-            grid.addCollectable(c);
+        for(BoardElement element : elements) {
+            grid.addElement(element);
         }
 
         GridPane container = new GridPane();

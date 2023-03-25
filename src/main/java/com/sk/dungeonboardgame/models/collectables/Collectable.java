@@ -1,26 +1,15 @@
 package com.sk.dungeonboardgame.models.collectables;
 
 import com.sk.dungeonboardgame.board.Tile;
+import com.sk.dungeonboardgame.models.board.BoardElement;
+import com.sk.dungeonboardgame.models.core.Position;
 import javafx.scene.image.ImageView;
 
-public abstract class Collectable {
-    public String name;
-    private int currentColumn;
-    private int currentRow;
-
-    public Collectable(String name, int column, int row) {
-        this.name = name;
-        this.currentColumn = column;
-        this.currentRow = row;
+public abstract class Collectable extends BoardElement {
+    public Collectable(String name, ImageView imageView, Position position) {
+        super(name, imageView, position);
     }
-
-    public abstract ImageView getImageView();
 
     public abstract void collect();
 
-    public void updateCurrentPosition(int row, int column, Tile tile) {
-        this.currentRow = row;
-        this.currentColumn = column;
-        //this.tile = tile;
-    }
 }

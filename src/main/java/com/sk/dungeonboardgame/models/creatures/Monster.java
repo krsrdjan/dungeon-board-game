@@ -1,5 +1,6 @@
 package com.sk.dungeonboardgame.models.creatures;
 
+import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -7,24 +8,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 
 public class Monster extends Creature {
-
     public int speedPoints = 2;
 
-    private ImageView imageView = new ImageView(new Image("/images/heroes/ninja.png"));
-
-    public Monster(String name, int health, Weapon claws, int row, int column) {
-        super(name, health, claws, row, column);
+    public Monster(String name, Position position, int health, Weapon weapon) {
+        super(name, new ImageView(new Image("/images/heroes/ninja.png")), position, health, weapon);
     }
 
-    public Monster(String name, int health, Weapon claws, int row, int column, String image) {
-        super(name, health, claws, row, column);
-
-        imageView = new ImageView(new Image("/images/heroes/" + image));
-    }
-
-    @Override
-    public ImageView getImageView() {
-        return imageView;
+    public Monster(String name, Position position, int health, Weapon weapon, String image) {
+        super(name, new ImageView(new Image("/images/heroes/" + image)), position, health, weapon);
     }
 
     @Override
@@ -34,7 +25,7 @@ public class Monster extends Creature {
         if (this.health <= 0) {
             this.health = 0;
             this.isAlive = false;
-            this.tile.removeMonster(this);
+            this.tile.removeElement(this);
 
             System.out.println(name + " is dead!");
         }
@@ -63,25 +54,21 @@ public class Monster extends Creature {
     public boolean moveToClosestHero() {
         System.out.println(name + ": Moving to closest hero");
 
-        int heroRow = tile.getHero().getCurrentRow();
-        int heroColumn = tile.getHero().getCurrentColumn();
+        Position difference = tile.getHero().getPosition().getDifference(this.position);
 
-        int rowDiff = heroRow - currentRow;
-        int columnDiff = heroColumn - currentColumn;
-
-        if(rowDiff > 1) {
+        if(difference.row > 1) {
             move(KeyCode.S);
             return true;
         }
-        if(rowDiff < -1) {
+        if(difference.row < -1) {
             move(KeyCode.W);
             return true;
         }
-        if(columnDiff > 1) {
+        if(difference.column > 1) {
             move(KeyCode.D);
             return true;
         }
-        if(columnDiff < -1) {
+        if(difference.column < -1) {
             move(KeyCode.A);
             return true;
         }
@@ -90,20 +77,6 @@ public class Monster extends Creature {
     }
 
     public boolean isNearHero() {
-        int heroRow = tile.getHero().getCurrentRow();
-        int heroColumn = tile.getHero().getCurrentColumn();
-
-        if(Math.abs(heroRow - currentRow) <= 1 && Math.abs(heroColumn - currentColumn) <= 1) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean checkHeroExist(int row, int column) {
-        int heroRow = tile.getHero().getCurrentRow();
-        int heroColumn = tile.getHero().getCurrentColumn();
-
-        return heroRow == row && heroColumn == column;
+        return tile.getHero().getPosition().getDistance(position) <= 1;
     }
 }
