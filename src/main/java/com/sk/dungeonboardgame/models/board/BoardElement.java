@@ -3,6 +3,7 @@ package com.sk.dungeonboardgame.models.board;
 import com.sk.dungeonboardgame.board.Field;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
+import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.ImageView;
 
 public abstract class BoardElement {
@@ -11,6 +12,7 @@ public abstract class BoardElement {
     protected boolean isObstacle;
     protected ImageView imageView;
     protected Position position;
+    protected Quadrant quadrant;
 
     public BoardElement(String name, ImageView imageView, Position position, ElementType type, boolean isObstacle) {
         this.name = name;
@@ -18,6 +20,7 @@ public abstract class BoardElement {
         this.position = position;
         this.type = type;
         this.isObstacle = isObstacle;
+        this.quadrant = GameState.field.getQuadrant(position);
     }
 
     public ImageView getImageView() {
@@ -28,8 +31,13 @@ public abstract class BoardElement {
         return position;
     }
 
+    public Quadrant getQuadrant() {
+        return quadrant;
+    }
+
     public void updatePosition(Position position) {
         this.position = position;
+        this.quadrant = GameState.field.getQuadrant(position);
     }
 
     public boolean isCollided(BoardElement el) {

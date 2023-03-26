@@ -25,6 +25,7 @@ public class Field extends GridPane {
     private List<BoardElement> elements = new ArrayList<BoardElement>();
     private Hero hero;
 
+    //<editor-fold desc="Initialization">
     public Field() {
         super();
         super.setBackground(
@@ -43,13 +44,18 @@ public class Field extends GridPane {
                                         false))
                 )
         );
+    }
+
+    public void initField() {
+        int idCount = 0;
 
         for (int row = 0; row < GameState.fieldSize / GameState.quadrantSize; row++) {
             for (int column = 0; column < GameState.fieldSize / GameState.quadrantSize; column++) {
-                quadrants.add(new Quadrant(new Position(row * GameState.quadrantSize, column * GameState.quadrantSize), this ));
+                quadrants.add(new Quadrant(idCount++, new Position(row * GameState.quadrantSize, column * GameState.quadrantSize)));
             }
         }
     }
+    //</editor-fold>
 
     //<editor-fold desc="Hero methods">
     public Hero getHero() {
@@ -124,30 +130,39 @@ public class Field extends GridPane {
 
         System.out.println("Element " + element.getType() + " removed");
 
-        if(element.getType() == ElementType.Hero) {
-            var imageView = element.getImageView();
-            //add creature to new position
-            imageView.setFitWidth(GameState.squareSize);
-            imageView.setFitHeight(GameState.squareSize);
-            super.add(imageView, position.column, position.row);
-            System.out.println("Element " + element.getType() + " placed on position (" + position.column + ", " + position.row + ")");
-        }
+        var imageView = element.getImageView();
+        //add creature to new position
+        imageView.setFitWidth(GameState.squareSize);
+        imageView.setFitHeight(GameState.squareSize);
+        super.add(imageView, position.column, position.row);
+        System.out.println("Element " + element.getType() + " placed on position (" + position.column + ", " + position.row + ")");
 
         element.updatePosition(position);
-
-        uncoverQuadrant();
     }
     //</editor-fold>
 
     //<editor-fold desc="Quadrant logic">
-    public void uncoverQuadrant() {
-        Quadrant quadrant = getQuadrant(this.hero.getPosition());
+    public void uncoverNearestQuadrant() {
+        Position heroPos = this.hero.getPosition();
 
-        if(quadrant != null)
+        uncoverQuadrant(getQuadrant(heroPos.addRow(-1)).getId());
+        uncoverQuadrant(getQuadrant(heroPos.addRow(1)).getId());
+        uncoverQuadrant(getQuadrant(heroPos.addColumn(-1)).getId());
+        uncoverQuadrant(getQuadrant(heroPos.addColumn(1)).getId());
+    }
+    private void uncoverQuadrant(int id) {
+        Quadrant quadrant = quadrants.get(id);
+
+        if(hero.getQuadrant().getId() == id) {
+            return;
+        }
+
+        if(quadrant != null) {
             quadrant.setDiscovered();
+        }
     }
 
-    private Quadrant getQuadrant(Position pos) {
+    public Quadrant getQuadrant(Position pos) {
         for(Quadrant q : quadrants) {
             if(q.getStartPosition().isInSameQuadrant(pos)) {
                 return q;

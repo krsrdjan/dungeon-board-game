@@ -20,6 +20,12 @@ public class MonsterAnimationTimer extends AnimationTimer {
     }
 
     private void handlee() {
+        if(monsters.size() == 0) {
+            GameState.isPlayerTurn = true;
+            stop();
+            return;
+        }
+
         Monster monster = monsters.get(currentIdx);
         if(monster.speedPoints > 0) {
             if(!monster.moveToClosestHero()) {

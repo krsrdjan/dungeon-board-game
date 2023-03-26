@@ -1,5 +1,6 @@
 package com.sk.dungeonboardgame.models.creatures;
 
+import com.sk.dungeonboardgame.models.board.Quadrant;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.board.Field;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
@@ -16,6 +17,7 @@ public class Hero extends Creature {
 
     public Hero(String name, Position position, int health, Weapon weapon) {
         super(name, new ImageView(new Image("/images/heroes/knight.png")), position, health, weapon, ElementType.Hero);
+        quadrant.setDiscovered(true);
     }
 
     @Override
@@ -44,6 +46,7 @@ public class Hero extends Creature {
             speedPoints--;
         }
 
+        GameState.field.uncoverNearestQuadrant();
         GameState.field.triggerCollectable();
 
         return true;

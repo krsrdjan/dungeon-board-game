@@ -4,6 +4,9 @@ public class Position {
     public int row;
     public int column;
 
+    public Position() {
+
+    }
     public Position(int row, int column) {
         this.row = row;
         this.column = column;
@@ -41,5 +44,17 @@ public class Position {
             return true;
 
         return false;
+    }
+
+    public Position addRow(int add){
+        return new Position(this.row + add, this.column);
+    }
+
+    public Position addColumn(int add){
+        return new Position(this.row, this.column + add);
+    }
+
+    public Position getRandomPosition(Position startPosition, int size) {
+        return new Position(startPosition.row + (int)(Math.random() * size), startPosition.column + (int)(Math.random() * size));
     }
 }

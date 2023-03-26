@@ -1,7 +1,9 @@
 package com.sk.dungeonboardgame;
 
 import com.sk.dungeonboardgame.board.Field;
+import com.sk.dungeonboardgame.mechanics.MonsterAnimationTimer;
 import com.sk.dungeonboardgame.models.core.Position;
+import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.creatures.Hero;
 import com.sk.dungeonboardgame.models.weapons.ShortSword;
 import com.sk.dungeonboardgame.state.GameState;
@@ -22,6 +24,7 @@ public class BoardGame extends Application {
         Field field = new Field();
 
         GameState.field = field;
+        field.initField();
 
         Hero hero = new Hero("Fighter", new Position(6, 2), 10, new ShortSword());
 
@@ -53,8 +56,8 @@ public class BoardGame extends Application {
                     break;
                 case O:
                     hero.endTurn();
-                    //MonsterAnimationTimer timer = new MonsterAnimationTimer(grid.getMonsters());
-                    //timer.start();
+                    MonsterAnimationTimer timer = new MonsterAnimationTimer(GameState.field.getElements(ElementType.Monster));
+                    timer.start();
                     break;
             }
         });

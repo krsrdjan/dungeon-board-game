@@ -2,6 +2,7 @@ package com.sk.dungeonboardgame.models.creatures;
 
 import com.sk.dungeonboardgame.models.board.BoardElement;
 import com.sk.dungeonboardgame.board.Field;
+import com.sk.dungeonboardgame.models.board.Quadrant;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
