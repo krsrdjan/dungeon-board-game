@@ -1,12 +1,13 @@
 package com.sk.dungeonboardgame.models.creatures;
 
-import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.board.BoardElement;
+import com.sk.dungeonboardgame.board.Field;
 import com.sk.dungeonboardgame.models.core.Position;
+import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
+import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 
 public abstract class Creature extends BoardElement {
     int health;
@@ -14,8 +15,8 @@ public abstract class Creature extends BoardElement {
     Weapon baseWeapon = null;
 
 
-    public Creature(String name, ImageView imageView, Position position, int health, Weapon baseWeapon) {
-        super(name, imageView, position);
+    public Creature(String name, ImageView imageView, Position position, int health, Weapon baseWeapon, ElementType type) {
+        super(name, imageView, position, type, true);
         this.health = health;
         this.baseWeapon = baseWeapon;
     }
@@ -59,13 +60,13 @@ public abstract class Creature extends BoardElement {
         System.out.println("Current position: " + position.row + " " + position.column + "Suggested position: " + suggetedPosition.row + " " + suggetedPosition.column);
 
         // position has already been taken
-        if(tile.isPlaceTaken(suggetedPosition)) {
+        if(!GameState.field.isValidMove(suggetedPosition)) {
             return false;
         }
 
         position = suggetedPosition;
 
-        tile.updatePosition(this, position);
+        GameState.field.updatePosition(this, position);
 
         return true;
     }

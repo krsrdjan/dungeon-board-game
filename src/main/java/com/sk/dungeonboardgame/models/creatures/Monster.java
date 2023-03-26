@@ -1,7 +1,9 @@
 package com.sk.dungeonboardgame.models.creatures;
 
 import com.sk.dungeonboardgame.models.core.Position;
+import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
+import com.sk.dungeonboardgame.state.GameState;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,11 +13,11 @@ public class Monster extends Creature {
     public int speedPoints = 2;
 
     public Monster(String name, Position position, int health, Weapon weapon) {
-        super(name, new ImageView(new Image("/images/heroes/ninja.png")), position, health, weapon);
+        super(name, new ImageView(new Image("/images/heroes/ninja.png")), position, health, weapon, ElementType.Monster);
     }
 
     public Monster(String name, Position position, int health, Weapon weapon, String image) {
-        super(name, new ImageView(new Image("/images/heroes/" + image)), position, health, weapon);
+        super(name, new ImageView(new Image("/images/heroes/" + image)), position, health, weapon, ElementType.Monster);
     }
 
     @Override
@@ -25,7 +27,7 @@ public class Monster extends Creature {
         if (this.health <= 0) {
             this.health = 0;
             this.isAlive = false;
-            this.tile.removeElement(this);
+            GameState.field.removeElement(this);
 
             System.out.println(name + " is dead!");
         }
@@ -54,7 +56,7 @@ public class Monster extends Creature {
     public boolean moveToClosestHero() {
         System.out.println(name + ": Moving to closest hero");
 
-        Position difference = tile.getHero().getPosition().getDifference(this.position);
+        Position difference = GameState.field.getHero().getPosition().getDifference(this.position);
 
         if(difference.row > 1) {
             move(KeyCode.S);
@@ -77,6 +79,6 @@ public class Monster extends Creature {
     }
 
     public boolean isNearHero() {
-        return tile.getHero().getPosition().getDistance(position) <= 1;
+        return GameState.field.getHero().getPosition().getDistance(position) <= 1;
     }
 }

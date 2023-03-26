@@ -30,4 +30,16 @@ public class Position {
     public Position clone() {
         return new Position(this.row, this.column);
     }
+
+    public boolean isInSameQuadrant(Position pos) {
+        Position startPos = new Position(pos.row - pos.row % 4, pos.column - pos.column % 4);
+
+        if(startPos.row <= row && startPos.row + 4 >= row && startPos.column <= column && startPos.column + 4 >= column)
+            return true;
+
+        if(startPos.row <= row && startPos.row + 4 >= row && startPos.column <= column && startPos.column + 4 >= column)
+            return true;
+
+        return false;
+    }
 }

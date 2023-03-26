@@ -1,7 +1,7 @@
 package com.sk.dungeonboardgame.models.collectables;
 
 import com.sk.dungeonboardgame.models.core.Position;
-import com.sk.dungeonboardgame.state.GameState;
+import com.sk.dungeonboardgame.board.Field;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
