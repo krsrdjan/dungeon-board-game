@@ -33,7 +33,7 @@ public class MonsterAnimationTimer extends AnimationTimer {
             }
             delay();
         } else {
-            monster.attack(GameState.field.getHero());
+            //monster.attack(GameState.field.getHero());
 
             currentIdx++;
             if(currentIdx >= monsters.size()) {

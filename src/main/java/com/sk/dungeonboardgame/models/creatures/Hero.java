@@ -1,8 +1,8 @@
 package com.sk.dungeonboardgame.models.creatures;
 
-import com.sk.dungeonboardgame.models.board.Quadrant;
+import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.core.Position;
-import com.sk.dungeonboardgame.board.Field;
+import com.sk.dungeonboardgame.models.core.enums.Direction;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import com.sk.dungeonboardgame.state.GameState;
@@ -12,13 +12,38 @@ import javafx.scene.input.KeyCode;
 
 public class Hero extends Creature {
 
-    private int speedPoints = 2;
+    private int speedPoints = 50;
     private int attackPoints = 1;
 
     public Hero(String name, Position position, int health, Weapon weapon) {
         super(name, new ImageView(new Image("/images/heroes/knight.png")), position, health, weapon, ElementType.Hero);
-        quadrant.setDiscovered(true);
     }
+
+    //<editor-fold desc="Actions">
+    @Override
+    public boolean move(Direction direction) {
+        System.out.println("move: " + direction);
+        if(!GameState.isPlayerTurn) {
+            return false;
+        }
+
+        if (speedPoints > 0) {
+            if(!super.move(direction)) {
+                return false;
+            }
+            speedPoints--;
+        }
+
+        // validate if tile switch is needed
+        if(super.isOnTileBorder(direction) && !tile.hasNeighbour(direction)) {
+            // if tile does not exist, initialize new tile
+            tile.addNeighbour(direction);
+            System.out.println("New tile added.");
+        }
+
+        return true;
+    }
+    //</editor-fold>
 
     @Override
     public void attacked(Weapon weapon) {
@@ -26,33 +51,14 @@ public class Hero extends Creature {
 
         if (this.health <= 0) {
             this.health = 0;
-            this.isAlive = false;
+            //this.isAlive = false;
             GameState.field.removeHero(this);
 
             System.out.println(name + " is dead!");
         }
     }
 
-    @Override
-    public boolean move(KeyCode keyCode) {
-        if(!GameState.isPlayerTurn) {
-            return false;
-        }
-
-        if (speedPoints > 0) {
-            if(!super.move(keyCode)) {
-                return false;
-            }
-            speedPoints--;
-        }
-
-        GameState.field.uncoverNearestQuadrant();
-        GameState.field.triggerCollectable();
-
-        return true;
-    }
-
-    @Override
+    //@Override
     public void attack(Creature target) {
         if(!GameState.isPlayerTurn) {
             return;

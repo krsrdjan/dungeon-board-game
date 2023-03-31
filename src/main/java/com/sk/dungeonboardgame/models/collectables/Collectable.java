@@ -8,7 +8,7 @@ import javafx.scene.image.ImageView;
 
 public abstract class Collectable extends BoardElement {
     public Collectable(String name, ImageView imageView, Position position) {
-        super(name, imageView, position, ElementType.Collectable, false);
+        super(name, imageView, position, ElementType.Collectable);
     }
 
     public abstract void collect();

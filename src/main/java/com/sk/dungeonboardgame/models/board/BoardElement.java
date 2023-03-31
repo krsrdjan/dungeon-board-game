@@ -1,26 +1,27 @@
 package com.sk.dungeonboardgame.models.board;
 
-import com.sk.dungeonboardgame.board.Field;
+import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.ImageView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public abstract class BoardElement {
     protected String name;
     protected ElementType type;
-    protected boolean isObstacle;
     protected ImageView imageView;
     protected Position position;
-    protected Quadrant quadrant;
+    protected Tile tile;
 
-    public BoardElement(String name, ImageView imageView, Position position, ElementType type, boolean isObstacle) {
+    public BoardElement(String name, ImageView imageView, Position position, ElementType type) {
         this.name = name;
         this.imageView = imageView;
         this.position = position;
         this.type = type;
-        this.isObstacle = isObstacle;
-        this.quadrant = GameState.field.getQuadrant(position);
     }
 
     public ImageView getImageView() {
@@ -31,22 +32,30 @@ public abstract class BoardElement {
         return position;
     }
 
-    public Quadrant getQuadrant() {
-        return quadrant;
-    }
-
-    public void updatePosition(Position position) {
+    public void setPosition(Position position) {
         this.position = position;
-        this.quadrant = GameState.field.getQuadrant(position);
     }
 
-    public boolean isCollided(BoardElement el) {
-        return this.position.isCollided(el.getPosition());
-    }
     public ElementType getType() {
         return type;
     }
+
+    public Tile getTile() {
+        return tile;
+    }
+
+    public void setTile(Tile tile) {
+        this.tile = tile;
+    }
+
     public boolean isObstacle() {
-        return isObstacle;
+        return getObstacleTypes().contains(type);
+    }
+
+    public static List<ElementType> getObstacleTypes() {
+        return Arrays.stream(new ElementType[] {
+                ElementType.Hero,
+                ElementType.Monster,
+                ElementType.Wall }).toList();
     }
 }

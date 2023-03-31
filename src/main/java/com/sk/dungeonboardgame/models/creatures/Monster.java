@@ -26,14 +26,13 @@ public class Monster extends Creature {
 
         if (this.health <= 0) {
             this.health = 0;
-            this.isAlive = false;
             GameState.field.removeElement(this);
 
             System.out.println(name + " is dead!");
         }
     }
 
-    @Override
+    /*@Override
     public boolean move(KeyCode keyCode) {
         // check if place is already taken
         if(speedPoints > 0) {
@@ -44,17 +43,10 @@ public class Monster extends Creature {
         }
 
         return true;
-    }
-
-    @Override
-    public void attack(Creature target) {
-        if(isNearHero()) {
-            super.attack(target);
-        }
-    }
+    }*/
 
     public boolean moveToClosestHero() {
-        System.out.println(name + ": Moving to closest hero");
+        /*System.out.println(name + ": Moving to closest hero");
 
         Position difference = GameState.field.getHero().getPosition().getDifference(this.position);
 
@@ -73,7 +65,7 @@ public class Monster extends Creature {
         if(difference.column < -1) {
             move(KeyCode.A);
             return true;
-        }
+        }*/
 
         return false;
     }

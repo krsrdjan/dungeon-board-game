@@ -1,29 +1,27 @@
 package com.sk.dungeonboardgame.models.creatures;
 
+import com.sk.dungeonboardgame.board.Tile;
 import com.sk.dungeonboardgame.models.board.BoardElement;
-import com.sk.dungeonboardgame.board.Field;
-import com.sk.dungeonboardgame.models.board.Quadrant;
 import com.sk.dungeonboardgame.models.core.Position;
+import com.sk.dungeonboardgame.models.core.enums.Direction;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.weapons.Weapon;
 import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
+
 public abstract class Creature extends BoardElement {
     int health;
-    boolean isAlive = true;
     Weapon baseWeapon = null;
 
-
     public Creature(String name, ImageView imageView, Position position, int health, Weapon baseWeapon, ElementType type) {
-        super(name, imageView, position, type, true);
+        super(name, imageView, position, type);
         this.health = health;
         this.baseWeapon = baseWeapon;
-    }
-
-    public boolean isAlive() {
-        return this.isAlive;
     }
 
     public void attacked(Weapon weapon) {
@@ -32,43 +30,65 @@ public abstract class Creature extends BoardElement {
         System.out.println(name + " hit by " + weapon.getName() + " for " + damage + " damage");
     }
 
-    public void attack(Creature target) {
-        if(this.isAlive) {
-            target.attacked(baseWeapon);
-        }
-    }
+    public boolean move(Direction direction) {
+        Position suggetedPosition = position.getPositionByDirection(direction);
 
-    public boolean move(KeyCode key) {
-        Position suggetedPosition = position.clone();
-
-        switch (key) {
-            case W:
-                suggetedPosition.row--;
-                break;
-            case S:
-                suggetedPosition.row++;
-                break;
-            case A:
-                suggetedPosition.column--;
-                break;
-            case D:
-                suggetedPosition.column++;
-                break;
-            default:
-                return false;
+        if(suggetedPosition == null) {
+            return false;
         }
 
         System.out.println("Current position: " + position.row + " " + position.column + "Suggested position: " + suggetedPosition.row + " " + suggetedPosition.column);
 
-        // position has already been taken
         if(!GameState.field.isValidMove(suggetedPosition)) {
+            System.out.println("Place is taken");
             return false;
         }
 
         position = suggetedPosition;
 
-        GameState.field.updatePosition(this, position);
+        if(isOutsideBorders(direction)) {
+            tile.removeElement(this);
+            tile = tile.getNeighbour(direction);
+            tile.addElement(this);
+        } else {
+            tile.setPosition(this, position);
+        }
 
         return true;
+    }
+
+    public boolean isOnTileBorder(Direction direction) {
+        var relativePos = position.getRelativePosition();
+
+        if(direction == Direction.UP && relativePos.row == 0) {
+            return true;
+        } else if(direction == Direction.DOWN && relativePos.row == 3) {
+            return true;
+        } else if(direction == Direction.LEFT && relativePos.column == 0) {
+            return true;
+        } else if(direction == Direction.RIGHT && relativePos.column == 3) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean isOutsideBorders(Direction direction) {
+        var relativePos = position;
+
+        System.out.println("Is outside borders" + direction);
+        System.out.println("X " + position.row + " " + position.column);
+
+        if(direction == Direction.UP && position.row < 0) {
+            return true;
+        } else if(direction == Direction.DOWN && position.row > 3) {
+            return true;
+        } else if(direction == Direction.LEFT && position.column < 0) {
+            return true;
+        } else if(direction == Direction.RIGHT && position.column > 3) {
+            return true;
+        }
+
+        return false;
     }
 }

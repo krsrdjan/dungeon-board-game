@@ -4,12 +4,12 @@ import com.sk.dungeonboardgame.board.Field;
 import com.sk.dungeonboardgame.mechanics.MonsterAnimationTimer;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
+import com.sk.dungeonboardgame.models.core.helpers.HelperMethods;
 import com.sk.dungeonboardgame.models.creatures.Hero;
 import com.sk.dungeonboardgame.models.weapons.ShortSword;
 import com.sk.dungeonboardgame.state.GameState;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
+import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -18,23 +18,15 @@ public class BoardGame extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         Field field = new Field();
 
-        GameState.field = field;
-        field.initField();
-
-        Hero hero = new Hero("Fighter", new Position(6, 2), 10, new ShortSword());
-
+        Hero hero = new Hero("Fighter", new Position(1, 2), 10, new ShortSword());
         field.setHero(hero);
 
-        GridPane container = new GridPane();
-        container.add(field, 0,0);
-
-        Scene scene = new Scene(container, Color.GRAY);
-        primaryStage.setTitle("Dungeon Delve Board Game");
+        Scene scene = new Scene(field, 800, 800, Color.BLACK);
 
         setupGameControls(hero, scene);
 
@@ -49,7 +41,7 @@ public class BoardGame extends Application {
                 case S:
                 case A:
                 case D:
-                    hero.move(event.getCode());
+                    hero.move(HelperMethods.keyStrokeToDirection(event.getCode()));
                     break;
                 case I:
                     //hero.attack();
