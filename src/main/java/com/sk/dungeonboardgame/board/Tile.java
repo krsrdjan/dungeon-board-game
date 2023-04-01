@@ -21,7 +21,6 @@ import java.util.*;
 import static java.util.Map.entry;
 
 public class Tile extends GridPane {
-    private Position position;
     private List<BoardElement> elements = new ArrayList<BoardElement>();
     private Rectangle[][] squares;
     private Map<List<Direction>, String> wallMap = Map.ofEntries(
