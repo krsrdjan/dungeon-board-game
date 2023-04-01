@@ -5,6 +5,8 @@ import com.sk.dungeonboardgame.models.collectables.Collectable;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.Direction;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
+import com.sk.dungeonboardgame.models.core.helpers.HelperMethods;
+import com.sk.dungeonboardgame.models.creatures.Creature;
 import com.sk.dungeonboardgame.models.creatures.Hero;
 import com.sk.dungeonboardgame.state.GameState;
 import javafx.scene.Node;
@@ -13,6 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class Field extends GridPane {
@@ -25,6 +28,7 @@ public class Field extends GridPane {
         GameState.field = this;
 
         tiles.add(new Tile());
+        tiles.get(0).initSetup(null);
         super.add(tiles.get(0), 0, 0);
     }
 
@@ -83,6 +87,36 @@ public class Field extends GridPane {
     private Position getTilePosition(Tile tile) {
         return new Position(this.getRowIndex(tile), this.getColumnIndex(tile));
     }
+
+    public void setTileNeighbours(Tile tile) {
+        Position pos = getTilePosition(tile);
+
+        Hashtable<String, Direction> coords = new Hashtable<String, Direction>();
+        coords.put((pos.row - 1) + "," + (pos.column - 1), Direction.UPLEFT);
+        coords.put((pos.row - 1) + "," + (pos.column), Direction.UP);
+        coords.put((pos.row - 1) + "," + (pos.column + 1), Direction.UPRIGHT);
+        coords.put((pos.row) + "," + (pos.column - 1), Direction.LEFT);
+        coords.put((pos.row) + "," + (pos.column + 1), Direction.RIGHT);
+        coords.put((pos.row + 1) + "," + (pos.column - 1), Direction.DOWNLEFT);
+        coords.put((pos.row + 1) + "," + (pos.column), Direction.DOWN);
+        coords.put((pos.row + 1) + "," + (pos.column + 1), Direction.DOWNRIGHT);
+
+        for(Node n : this.getChildren()) {
+            int row = this.getRowIndex(n);
+            int column = this.getColumnIndex(n);
+
+            String key = row +  "," + column;
+
+            if(coords.containsKey(key)) {
+                MapNeighbours(tile, (Tile)n, coords.get(key));
+            }
+        }
+    }
+
+    private void MapNeighbours(Tile source, Tile destination, Direction direction) {
+        source.setNeighbour(direction, destination);
+        destination.setNeighbour(HelperMethods.getReversedDirection(direction), source);
+    }
     //</editor-fold>
 
     //<editor-fold desc="Element methods">
@@ -121,12 +155,13 @@ public class Field extends GridPane {
     public List<BoardElement> getObstacles() {
         return getElements(BoardElement.getObstacleTypes());
     }
+
     //</editor-fold>
 
     //<editor-fold desc="Collider methods">
-    public boolean isValidMove(Position pos) {
+    public boolean isValidMove(Creature creature, Position pos) {
         // validate borders first
-        for(BoardElement el : getObstacles()) {
+        for(BoardElement el : creature.getTile().getObstacles()) {
             if(pos.isCollided(el.getPosition())) {
                 System.out.println("Position is taken by another element");
                 return false;

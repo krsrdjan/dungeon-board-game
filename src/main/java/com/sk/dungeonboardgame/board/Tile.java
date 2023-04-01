@@ -6,8 +6,11 @@ import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.Direction;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.core.helpers.HelperMethods;
+import com.sk.dungeonboardgame.models.creatures.Monster;
+import com.sk.dungeonboardgame.models.weapons.BattleAxe;
 import com.sk.dungeonboardgame.state.GameState;
 import com.sk.dungeonboardgame.state.Images;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -15,10 +18,26 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.*;
 
+import static java.util.Map.entry;
+
 public class Tile extends GridPane {
     private Position position;
     private List<BoardElement> elements = new ArrayList<BoardElement>();
     private Rectangle[][] squares;
+    private Map<List<Direction>, String> wallMap = Map.ofEntries(
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT }), "1001000020001001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.DOWN, Direction.LEFT }), "1001100210001001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.DOWN, Direction.RIGHT }), "1001000120011001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.LEFT, Direction.RIGHT }), "1111000000201001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.DOWN }), "1001102110011001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.LEFT }), "1111100012001001"),
+        entry(Arrays.asList(new Direction[] { Direction.UP, Direction.RIGHT }), "1111000100211001"),
+        entry(Arrays.asList(new Direction[] { Direction.DOWN, Direction.LEFT, Direction.RIGHT }), "1001000020001111"),
+        entry(Arrays.asList(new Direction[] { Direction.DOWN, Direction.LEFT, }), "1001100210001111"),
+        entry(Arrays.asList(new Direction[] { Direction.DOWN, Direction.RIGHT }), "1001000120011111"),
+        entry(Arrays.asList(new Direction[] { Direction.LEFT, Direction.RIGHT }), "1111000002001111")
+    );
+
     // tile neighbours
     HashMap<Direction, Tile> tileNeighbours = new HashMap<Direction, Tile>();
 
@@ -28,7 +47,7 @@ public class Tile extends GridPane {
         super.setBackground(
                 new Background(
                         new BackgroundImage(
-                                Images.tileImage,
+                                Images.tile,
                                 BackgroundRepeat.REPEAT,
                                 BackgroundRepeat.REPEAT,
                                 BackgroundPosition.DEFAULT,
@@ -45,7 +64,6 @@ public class Tile extends GridPane {
         this.squares = new Rectangle[GameState.tileSize][GameState.tileSize];
 
         initTile();
-        initSetup();
     }
 
     private void initTile() {
@@ -71,8 +89,6 @@ public class Tile extends GridPane {
     public void addElement(BoardElement element) {
         element.setTile(this);
         elements.add(element);
-        System.out.println("Current: " + element.getPosition().toText());
-        System.out.println("Relative: " + element.getPosition().getRelativePosition().toText());
         this.setPosition(element, element.getPosition().getRelativePosition());
     }
 
@@ -104,21 +120,29 @@ public class Tile extends GridPane {
     public List<BoardElement> getObstacles() {
         return getElements(BoardElement.getObstacleTypes());
     }
+
+    public Node getNodeByPosition(Position pos) {
+        for(Node node : this.getChildren()) {
+            if(this.getRowIndex(node) == pos.row && this.getColumnIndex(node) == pos.column) {
+                return node;
+            }
+        }
+
+        return null;
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="UI methods">
     public void setPosition(BoardElement element, Position position) {
-        System.out.println("Started updating position for " + element.getType());
         this.getChildren().remove(element.getImageView());
 
-        System.out.println("Element " + element.getType() + " removed");
 
         var imageView = element.getImageView();
         //add creature to new position
         imageView.setFitWidth(GameState.squareSize);
         imageView.setFitHeight(GameState.squareSize);
         super.add(imageView, position.column, position.row);
-        System.out.println("Element " + element.getType() + " placed on position (" + position.column + ", " + position.row + ")");
 
         element.setPosition(position);
     }
@@ -139,17 +163,43 @@ public class Tile extends GridPane {
 
     public void addNeighbour(Direction direction) {
         Tile neighbour = new Tile();
-        neighbour.initSetup();
+        neighbour.initSetup(direction);
         GameState.field.addTile(neighbour, direction);
-        tileNeighbours.put(direction, neighbour);
-        neighbour.setNeighbour(HelperMethods.getReversedDirection(direction), this);
+        GameState.field.setTileNeighbours(neighbour);
     }
 
-    private void initSetup() {
-        addElement(new Wall(new Position(0, 0)));
-        addElement(new Wall(new Position(0, 3)));
-        addElement(new Wall(new Position(3, 0)));
-        addElement(new Wall(new Position(3, 3)));
-    }
     //</editor-fold>
+
+    public void initSetup(Direction direction) {
+        String wall;
+        if(direction == null) {
+            wall = "1111100010001001";
+        } else {
+            Random rand = new Random();
+            List<String> wallOptions = new ArrayList<String>();
+            wallMap.keySet().stream().filter(x -> x.contains(direction)).forEach(x -> wallOptions.add(wallMap.get(x)));
+            wall = wallOptions.get(rand.nextInt(wallOptions.size()));
+        }
+
+        System.out.println("wall: " + wall);
+
+        for(int r = 0; r < GameState.tileSize; r++) {
+            for(int c = 0; c < GameState.tileSize; c++) {
+                char chr = wall.charAt(r * GameState.tileSize + c);
+
+                switch(chr) {
+                    case '0':
+                        break;
+                    case '1':
+                        addElement(new Wall(new Position(r, c)));
+                        break;
+                    case '2':
+                        Random rand = new Random();
+                        addElement(new Monster("Ninja", new Position(r, c), 5, new BattleAxe(), rand.nextInt(2) == 0 ? Images.ninja : Images.dragonborn));
+
+                        break;
+                }
+            }
+        }
+    }
 }

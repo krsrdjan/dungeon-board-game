@@ -16,8 +16,8 @@ public class Monster extends Creature {
         super(name, new ImageView(new Image("/images/heroes/ninja.png")), position, health, weapon, ElementType.Monster);
     }
 
-    public Monster(String name, Position position, int health, Weapon weapon, String image) {
-        super(name, new ImageView(new Image("/images/heroes/" + image)), position, health, weapon, ElementType.Monster);
+    public Monster(String name, Position position, int health, Weapon weapon, Image image) {
+        super(name, new ImageView(image), position, health, weapon, ElementType.Monster);
     }
 
     @Override

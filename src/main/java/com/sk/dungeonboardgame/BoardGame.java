@@ -1,7 +1,7 @@
 package com.sk.dungeonboardgame;
 
 import com.sk.dungeonboardgame.board.Field;
-import com.sk.dungeonboardgame.mechanics.MonsterAnimationTimer;
+import com.sk.dungeonboardgame.mechanics.animations.MonsterAnimationTimer;
 import com.sk.dungeonboardgame.models.core.Position;
 import com.sk.dungeonboardgame.models.core.enums.ElementType;
 import com.sk.dungeonboardgame.models.core.helpers.HelperMethods;
@@ -23,10 +23,10 @@ public class BoardGame extends Application {
 
         Field field = new Field();
 
-        Hero hero = new Hero("Fighter", new Position(1, 2), 10, new ShortSword());
+        Hero hero = new Hero("Fighter", new Position(2, 2), 10, new ShortSword());
         field.setHero(hero);
 
-        Scene scene = new Scene(field, 800, 800, Color.BLACK);
+        Scene scene = new Scene(field, GameState.screenWidth, GameState.screenHeight, Color.BLACK);
 
         setupGameControls(hero, scene);
 
@@ -42,6 +42,7 @@ public class BoardGame extends Application {
                 case A:
                 case D:
                     hero.move(HelperMethods.keyStrokeToDirection(event.getCode()));
+                    // calculate hero position and possibility for realign of the scene
                     break;
                 case I:
                     //hero.attack();

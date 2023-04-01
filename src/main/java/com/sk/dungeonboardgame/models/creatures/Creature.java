@@ -37,10 +37,7 @@ public abstract class Creature extends BoardElement {
             return false;
         }
 
-        System.out.println("Current position: " + position.row + " " + position.column + "Suggested position: " + suggetedPosition.row + " " + suggetedPosition.column);
-
-        if(!GameState.field.isValidMove(suggetedPosition)) {
-            System.out.println("Place is taken");
+        if(!GameState.field.isValidMove(this, suggetedPosition)) {
             return false;
         }
 

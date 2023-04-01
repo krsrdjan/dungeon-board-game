@@ -1,4 +1,4 @@
-package com.sk.dungeonboardgame.mechanics;
+package com.sk.dungeonboardgame.mechanics.animations;
 
 import com.sk.dungeonboardgame.models.creatures.Monster;
 import com.sk.dungeonboardgame.state.GameState;

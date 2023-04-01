@@ -10,6 +10,6 @@ import javafx.scene.image.ImageView;
 public class Wall extends BoardElement {
 
     public Wall(Position position) {
-        super("Wall", new ImageView(Images.wallImage), position, ElementType.Wall);
+        super("Wall", new ImageView(Images.wall), position, ElementType.Wall);
     }
 }

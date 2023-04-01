@@ -4,6 +4,9 @@ import com.sk.dungeonboardgame.board.Field;
 import javafx.scene.image.Image;
 
 public class Images {
-    public static Image wallImage = new Image("/images/tiles/wall.png");
-    public static Image tileImage = new Image(Field .class.getResourceAsStream("/images/tiles/tile.png"));
+    public static Image hero = new Image("/images/heroes/knight.png");
+    public static Image wall = new Image("/images/tiles/wall.png");
+    public static Image tile = new Image(Field .class.getResourceAsStream("/images/tiles/tile.png"));
+    public static Image ninja = new Image("/images/heroes/ninja.png");
+    public static Image dragonborn = new Image("/images/heroes/dragonborn.png");
 }
